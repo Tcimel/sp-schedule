@@ -86,5 +86,3 @@ src
 - 모든 응답은 DTO 객체로 클라이언트에 반환됩니다.
 
 ---
-
-_작성자: [Sunyoung](https://github.com/your-profile)_
