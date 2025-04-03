@@ -5,18 +5,6 @@
 
 ---
 
-## 📚 기술 스택
-
-- Java 17
-- Spring Boot 3.x
-- Spring Web / JPA / H2 / Lombok
-- Spring Data JPA + Hibernate
-- JPA Auditing
-- RESTful API
-- Postman 테스트
-
----
-
 ## 📌 ERD 설계
 
 ```
