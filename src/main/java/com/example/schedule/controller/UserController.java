@@ -1,14 +1,16 @@
 package com.example.schedule.controller;
 
-import com.example.schedule.dto.SignUpRequestDto;
-import com.example.schedule.dto.SignUpResponseDto;
-import com.example.schedule.dto.UpdatePasswordDto;
-import com.example.schedule.dto.UserResponseDto;
+import com.example.schedule.dto.*;
 import com.example.schedule.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/user")
@@ -23,6 +25,26 @@ public class UserController {
         SignUpResponseDto responseDto = userService.signUp(requestDto.getUsername(),requestDto.getPassword(),requestDto.getEmail());
 
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(
+           @Valid @RequestBody LoginRequestDto requestDto,
+           HttpServletResponse response
+    ){
+        //로그인 유저 조회
+        LoginResponseDto responseDto = userService.login(requestDto);
+
+        //아이디 없을 경우
+        if(responseDto.getId()==null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"존재하지 않는 아이디 입니다.");
+        }
+
+        //로그인 성공 시 쿠키 생성 및 저장
+        Cookie cookie = new Cookie("userId",String.valueOf(responseDto.getId()));
+        response.addCookie(cookie);
+
+        return new ResponseEntity<>("로그인 성공",HttpStatus.OK);
     }
 
     @GetMapping("/{id}")

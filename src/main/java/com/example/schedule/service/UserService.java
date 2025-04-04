@@ -1,9 +1,12 @@
 package com.example.schedule.service;
 
+import com.example.schedule.dto.LoginRequestDto;
+import com.example.schedule.dto.LoginResponseDto;
 import com.example.schedule.dto.SignUpResponseDto;
 import com.example.schedule.dto.UserResponseDto;
 import com.example.schedule.entity.User;
 import com.example.schedule.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -56,4 +59,10 @@ public class UserService {
         userRepository.delete(findUser);
     }
 
+    public LoginResponseDto login(@Valid LoginRequestDto requestDto) {
+        //입력받은 이메일과 비밀번호로 유저 아이디 조회
+        Long id = userRepository.findIdByEmailAndPasswordOrElseThrow(requestDto);
+
+        return new LoginResponseDto(id);
+    }
 }
