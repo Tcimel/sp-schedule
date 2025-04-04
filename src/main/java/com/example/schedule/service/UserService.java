@@ -47,8 +47,11 @@ public class UserService {
 
     }
 
+    @Transactional
     public void updatePassword(Long id,String oldPw, String newPw){
         User findUser = userRepository.findByIdOrElseThrow(id);
+
+
 
         if(!passwordEncoder.matches(oldPw,findUser.getPassword())){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"비밀번호가 일치하지 않습니다.");
@@ -56,7 +59,10 @@ public class UserService {
 //        if(!findUser.getPassword().equals(oldPw)){
 //            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"기존 비밀번호가 일치하지 않습니다.");
 //        }
-        findUser.updatePassword(newPw);
+
+        String encodedPassword = passwordEncoder.encdoe(newPw);
+
+        findUser.updatePassword(encodedPassword);
     }
 
     public void deleteUser(Long id, String pw){
@@ -70,7 +76,7 @@ public class UserService {
         userRepository.delete(findUser);
     }
 
-    public LoginResponseDto login(@Valid LoginRequestDto requestDto) {
+    public LoginResponseDto login(LoginRequestDto requestDto) {
 
         User user = userRepository.findByEmail(requestDto.getEmail()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"존재하지 않는 이메일 입니다."));
 

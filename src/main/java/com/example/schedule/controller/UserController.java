@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -90,7 +90,15 @@ public class UserController {
         session.setAttribute(Const.LOGIN_USER, loginUser);
 
         return new ResponseEntity<>("로그인 성공",HttpStatus.OK);
+    }
 
+    //Get Delete 역등성 때문에 리퀘스트 바디로 받아오는 방식 권장하지 않음.
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id, @RequestBody String password){
+        userService.deleteUser(id,password);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }
