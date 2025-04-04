@@ -1,5 +1,6 @@
 package com.example.schedule.service;
 
+import com.example.schedule.config.PasswordEncoder;
 import com.example.schedule.dto.ScheduleResponseDto;
 import com.example.schedule.dto.UpdateScheduleRequestDto;
 import com.example.schedule.entity.Schedule;
@@ -20,6 +21,7 @@ public class ScheduleService {
 
     private final UserRepository userRepository;
     private final ScheduleRepository scheduleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public ScheduleResponseDto save(Long userId, String title, String content){
         User findUser = userRepository.findByIdOrElseThrow(userId);
@@ -48,9 +50,12 @@ public class ScheduleService {
     public ScheduleResponseDto updateSchedule(Long id, UpdateScheduleRequestDto requestDto){
         Schedule findSchedule = scheduleRepository.findByIdOrElseThrow(id);
 
-        if(!findSchedule.getUser().getPassword().equals(requestDto.getPassword())){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호 불일치");
+        if(!passwordEncoder.matches(requestDto.getPassword(),findSchedule.getUser().getPassword())){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"비밀번호가 일치하지 않습니다.");
         }
+//        if(!findSchedule.getUser().getPassword().equals(requestDto.getPassword())){
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호 불일치");
+//        }
 
         if(requestDto.getTitle()!=null){
             findSchedule.updateTitle(requestDto.getTitle());
@@ -65,9 +70,12 @@ public class ScheduleService {
     public void delete(Long id, String password){
         Schedule findSchedule = scheduleRepository.findByIdOrElseThrow(id);
 
-        if(!findSchedule.getUser().getPassword().equals(password)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호 불일치");
+        if(!passwordEncoder.matches(password,findSchedule.getUser().getPassword())){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"비밀번호가 일치하지 않습니다.");
         }
+//        if(!findSchedule.getUser().getPassword().equals(password)){
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호 불일치");
+//        }
 
         scheduleRepository.delete(findSchedule);
     }
