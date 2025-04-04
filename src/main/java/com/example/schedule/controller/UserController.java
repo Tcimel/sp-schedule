@@ -1,10 +1,12 @@
 package com.example.schedule.controller;
 
+import com.example.schedule.common.Const;
 import com.example.schedule.dto.*;
 import com.example.schedule.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,10 +29,27 @@ public class UserController {
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDto> findById(@PathVariable Long id){
+        UserResponseDto responseDto = userService.findById(id);
+        return new ResponseEntity<>(responseDto,HttpStatus.OK);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> updatePassword(
+            @PathVariable Long id,
+            @RequestBody UpdatePasswordDto requestDto
+            ){
+        userService.updatePassword(id,requestDto.getOldPw(),requestDto.getNewPw());
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    //쿠키 처리 방법
     @PostMapping("/login")
     public ResponseEntity<String> login(
-           @Valid @RequestBody LoginRequestDto requestDto,
-           HttpServletResponse response
+            @Valid @RequestBody LoginRequestDto requestDto,
+            HttpServletResponse response
     ){
         //로그인 유저 조회
         LoginResponseDto responseDto = userService.login(requestDto);
@@ -47,19 +66,31 @@ public class UserController {
         return new ResponseEntity<>("로그인 성공",HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto> findById(@PathVariable Long id){
-        UserResponseDto responseDto = userService.findById(id);
-        return new ResponseEntity<>(responseDto,HttpStatus.OK);
+    //세션 처리 방법
+    @PostMapping("/session-login")
+    public ResponseEntity<String> Login(
+            @Valid @RequestBody LoginRequestDto requestDto,
+            HttpServletRequest request
+    ){
+        LoginResponseDto responseDto = userService.login(requestDto);
+        Long userId = responseDto.getId();
+
+        /*if(userId == null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"존재하지 않는 유저입니다.");
+            //어차피 서비스에서 로그인 처리로 유저 조회할때 Throw Else 하니까 주석 처리
+        }*/
+
+        //로그인 성공
+        //getSession(true) : default, 세션 없으면 생성
+        HttpSession session = request.getSession();
+
+        UserResponseDto loginUser = userService.findById(userId);
+
+        // 세션에 로그인 회원 정보 저장
+        session.setAttribute(Const.LOGIN_USER, loginUser);
+
+        return new ResponseEntity<>("로그인 성공",HttpStatus.OK);
+
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<Void> updatePassword(
-            @PathVariable Long id,
-            @RequestBody UpdatePasswordDto requestDto
-            ){
-        userService.updatePassword(id,requestDto.getOldPw(),requestDto.getNewPw());
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
 }
