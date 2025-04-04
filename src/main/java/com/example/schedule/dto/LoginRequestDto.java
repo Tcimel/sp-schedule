@@ -6,10 +6,10 @@ import lombok.Getter;
 @Getter
 public class LoginRequestDto {
 
-    @NotBlank
+    @NotBlank(message = "필수")
     private final String email;
 
-    @NotBlank
+    @NotBlank(message = "필수")
     private final String password;
 
     public LoginRequestDto(String email, String password) {
